@@ -1,0 +1,10 @@
+---
+title: "Exercise 3"
+output: html_notebook
+---
+
+# Task 3
+
+a) Manually create a decision tree classifying whether goal will be saved or not.
+
+![Manual sketch of decision tree](dec_tree.jpg)

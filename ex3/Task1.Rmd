@@ -1,0 +1,91 @@
+---
+title: "Exercise 1"
+output: html_notebook
+---
+
+# Task 1
+
+a) 
+
+Suppose we have learned Gaussian naive Bayes classifier with following parameters: 
+$$
+Y \in \{+1 , -1\}, \\
+X_1, X_2 \in \mathbb{R} \\
+and \\
+\hat{\mu}_{-j} = 0 \\
+\hat{\mu}_{+j} = 0 \\
+\sigma^2_{-j} = 1 \\
+\sigma^2_{+j} = 16 \text{ for } j \in \{ 1,2 \}.
+$$
+We also use a uniform class prior $\hat{p}(y) = \frac{1}{2} \text{ for } y \in \{-1, +1 \}$. Calculate posterior probabilities with the Bayes formula
+
+$$
+P\left(Y = +1 | X_1 = 1 , X_2 = 2 \right) = 
+\frac{
+  P\left(X_1 = 1 , X_2 = 2 | Y = +1 | \right) P(Y = +1)}
+  {P\left( X_1 = 1, X_2 = 2 \right)} = 
+\frac{
+  \hat{p}(+1) f_{+1}(x)}
+  {\sum^K_{l=1}\hat{p}(l)f_l(x)}
+$$
+
+Because the distribution $X_1$ and $X_2$ are multivariate Gaussian distributions, we can use the density function of normal distribution as $f(x)_k$. Therefore,
+
+$$
+f(x)_k = 
+\frac{1}{\sqrt{2 \pi} \sigma^2_{x_1k} \sigma^2_{x_2k}}
+e^{-\frac{1}{2}(x - \mu_k)^T\sum^{-1}(x - \mu_k)}.
+$$
+?
+Now we plug in the means and variances for $x = {1,2}$ and prior probabilites for $y$ and calculate the posterior probability.
+
+```{r}
+library(mvtnorm)
+library(MASS)
+sigma_plus = matrix(c(16,0,0,16), nrow = 2, ncol = 2)
+sigma_minus = matrix(c(1,0,0,1), nrow = 2, ncol = 2)
+x = c(1,2)
+
+
+
+calc_posterior_X_plus = function(sigma_plus, sigma_minus, x) {
+  density_X_plus = dmvnorm(x, sigma = sigma_plus)
+  density_X_minus = dmvnorm(x, sigma = sigma_minus)
+  (0.5 * density_X_plus) / ((0.5 * density_X_plus) + (0.5 * density_X_minus))
+} 
+
+posterior_X_plus = calc_posterior_X_plus(sigma_plus, sigma_minus, x)
+```
+
+
+$P\left(Y = +1 | X_1 = 1 , X_2 = 2 \right) =$ `r posterior_X_plus`
+
+b)
+
+```{r}
+set.seed(35)
+x = -20:20
+y = x
+grid = expand.grid(x, y)
+
+densities = apply(grid, 1, function(x) calc_posterior_X_plus(sigma_plus, sigma_minus, x))
+densities = matrix(densities, nrow=41)
+
+two_d_density = kde2d(x, y, densities, n=41)
+
+contour(x,y,densities)
+image(densities)
+persp(densities)
+```
+
+c)
+
+QDA assumes that an observation from $k$th class is of the form $X \sim N(\mu_k, \sum_k)$. It is easy to see that our naive Bayes classifier models a distribution of this form. Choosing 
+$\mu_+ = \mu_- = [0,0]$ and $\sum_- = \begin{bmatrix}1 & 0 \\ 0 & 1 \end{bmatrix}$,
+$\sum+- = \begin{bmatrix}16 & 0 \\ 0 & 16 \end{bmatrix}$, it can be seen that this indeed is a special case of QDA.
+
+d)
+
+Naive Bayes classifier assumes features are independent. Thus you only need $k * p$ free parameters for specifying naive Bayes classifier.
+
+QDA however makes no such assumption. As each of the features may correlate with each other, amount of free parameters grow quadratically instead of linearly, i.e. $k * p(p+1)/2$.
