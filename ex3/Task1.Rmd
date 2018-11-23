@@ -89,3 +89,5 @@ d)
 Naive Bayes classifier assumes features are independent. Thus you only need $k * p$ free parameters for specifying naive Bayes classifier.
 
 QDA however makes no such assumption. As each of the features may correlate with each other, amount of free parameters grow quadratically instead of linearly, i.e. $k * p(p+1)/2$.
+
+QDA is the more complex model, thus it might overfit problems that are linear.
